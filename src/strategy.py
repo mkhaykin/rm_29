@@ -23,7 +23,7 @@ class StrategyZero(StrategyAbc):
     """
 
     def calc(self) -> dict[str, int]:
-        return {request.dest_location: 0 for request in self._requests}
+        return {request.request_id: 0 for request in self._requests}
 
 
 class StrategyFAFR(StrategyAbc):
@@ -44,7 +44,7 @@ class StrategyFAFR(StrategyAbc):
                 count = 0
 
             balance -= count
-            result[request.dest_location] = count
+            result[request.request_id] = count
 
         return result
 

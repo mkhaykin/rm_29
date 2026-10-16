@@ -6,7 +6,6 @@ import csv
 from dataclasses import dataclass
 from itertools import groupby
 from pathlib import Path
-from pprint import pprint
 from typing import Generator, List, Optional, Type
 
 
@@ -56,17 +55,15 @@ def read_request_csv(file_path: str | Path) -> Generator[List[RequestRaw], None,
             yield [_raw_to_dataclass(row, RequestRaw, int_fields) for row in group]
 
 
-def main() -> None:
+def reader() -> Generator[tuple[SupplyRaw, List[RequestRaw]], None, None]:
     path_to_data = Path(__file__).parent.parent / "data"
 
     supply_file = path_to_data / "supply.csv"
-    for supply in read_supply_csv(supply_file):
-        pprint(supply)
-
     requests_file = path_to_data / "requests.csv"
-    for request in read_request_csv(requests_file):
-        pprint(request)
 
-
-if __name__ == "__main__":
-    main()
+    for supply, requests in zip(
+        read_supply_csv(supply_file),
+        read_request_csv(requests_file),
+        strict=True,
+    ):
+        yield supply, requests

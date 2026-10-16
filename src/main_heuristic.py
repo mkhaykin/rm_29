@@ -26,11 +26,11 @@
 
 import logging
 from multiprocessing import Pool
-from pathlib import Path
 from typing import List, Type
 
 from penalty import penalty
-from reader import RequestRaw, read_request_csv, read_supply_csv
+from print_result import print_result
+from reader import RequestRaw, reader
 from strategy import (
     StrategyAbc,
     StrategyFAFR,
@@ -53,7 +53,10 @@ def worker(
     return obj.calc()
 
 
-def main() -> None:
+def allocate(
+    available_qty: int,
+    requests: List[RequestRaw],
+) -> dict[str, int]:
     strategies: List[Type[StrategyAbc]] = [
         StrategyZero,
         StrategyFAFR,
@@ -61,30 +64,26 @@ def main() -> None:
         StrategyFAFRMinFirst,
         StrategyFAFRMaxFirst,
     ]
-    path_to_data = Path(__file__).parent.parent / "data"
+    with Pool(processes=len(strategies)) as pool:
+        params = [(strategy, available_qty, requests) for strategy in strategies]
+        results = pool.starmap(worker, params)
+        if not results:
+            logger.error("Вообще не получил результатов, но идем дальше")
+            return {request.request_id: 0 for request in requests}
 
-    supply_file = path_to_data / "supply.csv"
-    requests_file = path_to_data / "requests.csv"
+        best_result = results[0]
+        best_penalty = penalty(requests, results[0])
+        for result in results[1:]:
+            if penalty(requests, result) < best_penalty:
+                best_result = result
 
-    for supply, requests in zip(
-        read_supply_csv(supply_file),
-        read_request_csv(requests_file),
-        strict=True,
-    ):
-        with Pool(processes=len(strategies)) as pool:
-            params = [(strategy, supply.available_qty, requests) for strategy in strategies]
-            results = pool.starmap(worker, params)
-            if not results:
-                logger.error("Вообще не получил результатов, но идем дальше")
-                continue
+    return best_result
 
-            best_result = results[0]
-            best_penalty = penalty(requests, results[0])
-            for result in results[1:]:
-                if penalty(requests, result) < best_penalty:
-                    best_result = result
 
-            print(best_result)
+def main() -> None:
+    for supply, requests in reader():
+        result = allocate(supply.available_qty, requests)
+        print_result(supply, requests, result)
 
 
 if __name__ == "__main__":

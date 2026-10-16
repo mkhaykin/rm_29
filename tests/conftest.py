@@ -31,7 +31,7 @@ def create_requests():
                 RequestRaw(
                     dest_location=f"LOC{i}",
                     case_id="SOME_CASE",
-                    request_id="SOME_REQUEST",
+                    request_id=f"R-{i:03}",
                     demand_qty=d,
                     priority=p,
                     min_lot=m,
