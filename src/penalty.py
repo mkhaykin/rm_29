@@ -23,7 +23,7 @@ def penalty(
                 ans += int(
                     100 * abs(result.get(request.request_id, 0) - request.demand_qty) / request.demand_qty,
                 )
-                request_penalty *= 10 * (max_priority - request.priority)
+                request_penalty += 10 * (max_priority - request.priority)
         ans += request_penalty
 
     return ans
