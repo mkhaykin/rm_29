@@ -74,8 +74,10 @@ def allocate(
         best_result = results[0]
         best_penalty = penalty(requests, results[0])
         for result in results[1:]:
-            if penalty(requests, result) < best_penalty:
+            value = penalty(requests, result)
+            if value < best_penalty:
                 best_result = result
+                best_penalty = value
 
     return best_result
 
