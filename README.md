@@ -1,6 +1,6 @@
 # Тестовое задание
 
-Контекст
+Описание решения [REPORT.md](REPORT.md)
 
 ## Что делает модуль
 
@@ -76,7 +76,7 @@ def allocate(available_qty: int, requests: Iterable[Request]) -> dict[str, int]:
 
 Требуется · 4
 
-## Отчёт `REPORT.md`
+## Отчёт [`REPORT.md`](./REPORT.md)
 
 Одна–две страницы, не больше.
 
